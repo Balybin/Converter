@@ -42,7 +42,7 @@ public class Converter extends AppCompatActivity {
                 try {
                     String url = "https://free.currencyconverterapi.com/api/v6/convert?q=" +
                             currencyData.get(currencyFrom.getSelectedItem()) + "_"
-                            + currencyData.get(currencyTo.getSelectedItem()) + "&compact=ultra";
+                            + currencyData.get(currencyTo.getSelectedItem()) + "&compact=ultra&apiKey=973c6ac039f7d47fbd2f";
                     NetworkManager networkManager = new NetworkManager();
                     String inputLine = networkManager.makeRequest(Converter.this, url);
                     inputLine = inputLine.substring(inputLine.indexOf(":") + 1, inputLine.length() - 1);
@@ -59,7 +59,7 @@ public class Converter extends AppCompatActivity {
         do {
             try {
                 NetworkStatus = false;
-                String url = "https://free.currencyconverterapi.com/api/v6/currencies";
+                String url = "http://free.currencyconverterapi.com/api/v6/currencies?apiKey=973c6ac039f7d47fbd2f";
                 NetworkManager networkManager = new NetworkManager();
                 String inputLine = networkManager.makeRequest(this, url);
                 if (inputLine == null) NetworkStatus = true;
