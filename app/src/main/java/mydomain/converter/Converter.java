@@ -40,12 +40,11 @@ public class Converter extends AppCompatActivity {
             public void onClick(View v) {
                 //URL url = new URL("https://free.currencyconverterapi.com/api/v6/convert?q=RUB_BTC&compact=ultra")
                 try {
-                    URL url = new URL("https://free.currencyconverterapi.com/api/v6/convert?q=" +
+                    String url = "https://free.currencyconverterapi.com/api/v6/convert?q=" +
                             currencyData.get(currencyFrom.getSelectedItem()) + "_"
-                            + currencyData.get(currencyTo.getSelectedItem()) + "&compact=ultra");
-                    Requestor requestor = new Requestor();
-                    requestor.execute(url);
-                    String inputLine = requestor.get();
+                            + currencyData.get(currencyTo.getSelectedItem()) + "&compact=ultra";
+                    NetworkManager networkManager = new NetworkManager();
+                    String inputLine = networkManager.makeRequest(Converter.this, url);
                     inputLine = inputLine.substring(inputLine.indexOf(":") + 1, inputLine.length() - 1);
                     double coef = Double.parseDouble(inputLine);
                     double number = Double.parseDouble(inputField.getText().toString());
@@ -56,14 +55,14 @@ public class Converter extends AppCompatActivity {
             }
         };
         convertButton.setOnClickListener(oclConvertButton);
-        boolean NetworkStatus;
+        boolean NetworkStatus = false;
         do {
             try {
                 NetworkStatus = false;
-                URL url = new URL("https://free.currencyconverterapi.com/api/v6/currencies");
-                Requestor requestor = new Requestor();
-                requestor.execute(url);
-                String inputLine = requestor.get();
+                String url = "https://free.currencyconverterapi.com/api/v6/currencies";
+                NetworkManager networkManager = new NetworkManager();
+                String inputLine = networkManager.makeRequest(this, url);
+                if (inputLine == null) NetworkStatus = true;
                 int counter = 0, index = inputLine.indexOf("currencyName");
                 String buf;
                 while (index != -1) {
@@ -84,8 +83,10 @@ public class Converter extends AppCompatActivity {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 currencyFrom.setAdapter(adapter);
                 currencyTo.setAdapter(adapter);
-                } catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+            }
+            /*
                 NetworkStatus = true;
                 AlertDialog.Builder ad = new AlertDialog.Builder(this);
                 ad.setTitle("Ошибка!");
@@ -94,8 +95,8 @@ public class Converter extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id){
                         dialog.cancel();}
                 });
-                ad.show();
-            }
+                ad.show();*/
+
         } while (NetworkStatus);
 
         // findViewById(R.id.currencyFrom);
