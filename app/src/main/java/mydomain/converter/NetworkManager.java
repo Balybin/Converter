@@ -43,7 +43,7 @@ public class NetworkManager {
                                 }
                             });
             AlertDialog alert = builder.create();
-            builder.show();
+            alert.show();
             result = null;
             return result;
         }

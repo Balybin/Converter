@@ -59,11 +59,13 @@ public class Converter extends AppCompatActivity {
         do {
             try {
                 NetworkStatus = false;
+                int index = -1;
+                int counter = 0;
                 String url = "http://free.currencyconverterapi.com/api/v6/currencies?apiKey=973c6ac039f7d47fbd2f";
                 NetworkManager networkManager = new NetworkManager();
                 String inputLine = networkManager.makeRequest(this, url);
                 if (inputLine == null) NetworkStatus = true;
-                int counter = 0, index = inputLine.indexOf("currencyName");
+                else index = inputLine.indexOf("currencyName");
                 String buf;
                 while (index != -1) {
                     inputLine = inputLine.substring(index + 15);
