@@ -1,33 +1,31 @@
 package mydomain.converter;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.net.*;
-import java.util.*;
-import java.io.*;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Converter extends AppCompatActivity {
 
     Map<String, String> currencyData = new HashMap<String, String>();
     ArrayList<String> currencyList = new ArrayList<String>();
+    boolean DataStatus = false;
 
     //ArrayList<Map<String,String>> currencyData = new ArrayList<Map<String,String>>;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("MyTag", "onStart()");
         setContentView(R.layout.activity_converter);
         final Spinner currencyFrom = (Spinner) findViewById(R.id.currencyFrom);
         final Spinner currencyTo = (Spinner) findViewById(R.id.currencyTo);
@@ -55,17 +53,28 @@ public class Converter extends AppCompatActivity {
             }
         };
         convertButton.setOnClickListener(oclConvertButton);
-        boolean NetworkStatus = false;
-        do {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencyList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currencyFrom.setAdapter(adapter);
+        currencyTo.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("MyTag", "onResume()");
+        while(!DataStatus) {
             try {
-                NetworkStatus = false;
                 int index = -1;
                 int counter = 0;
                 String url = "http://free.currencyconverterapi.com/api/v6/currencies?apiKey=973c6ac039f7d47fbd2f";
                 NetworkManager networkManager = new NetworkManager();
                 String inputLine = networkManager.makeRequest(this, url);
-                if (inputLine == null) NetworkStatus = true;
-                else index = inputLine.indexOf("currencyName");
+                if (inputLine == null) DataStatus = false;
+                else {
+                    index = inputLine.indexOf("currencyName");
+                    DataStatus = true;
+                }
                 String buf;
                 while (index != -1) {
                     inputLine = inputLine.substring(index + 15);
@@ -81,26 +90,26 @@ public class Converter extends AppCompatActivity {
                     counter++;
                 }
                 Collections.sort(currencyList);
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencyList);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                currencyFrom.setAdapter(adapter);
-                currencyTo.setAdapter(adapter);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            /*
-                NetworkStatus = true;
-                AlertDialog.Builder ad = new AlertDialog.Builder(this);
-                ad.setTitle("Ошибка!");
-                ad.setMessage("Что-то не так с интернет-соединением");
-                ad.setNegativeButton("Ок", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id){
-                        dialog.cancel();}
-                });
-                ad.show();*/
+        }
+    }
 
-        } while (NetworkStatus);
-
-        // findViewById(R.id.currencyFrom);
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.i("MyTag", "onPause");
+    }
+    @Override
+    protected void onStop(){
+        super.onStop();
+        Log.i("MyTag", "onStop");
+    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.i("MyTag", "onDestroy");
     }
 }
