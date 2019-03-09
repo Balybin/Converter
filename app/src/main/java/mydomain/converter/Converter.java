@@ -1,5 +1,6 @@
 package mydomain.converter;
 
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,7 +20,7 @@ public class Converter extends AppCompatActivity {
 
     Map<String, String> currencyData = new HashMap<String, String>();
     ArrayList<String> currencyList = new ArrayList<String>();
-    boolean DataStatus = false;
+    boolean isDataLoaded = false;
 
     //ArrayList<Map<String,String>> currencyData = new ArrayList<Map<String,String>>;
     @Override
@@ -50,6 +51,7 @@ public class Converter extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                isDataLoaded = false;
             }
         };
         convertButton.setOnClickListener(oclConvertButton);
@@ -63,53 +65,67 @@ public class Converter extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i("MyTag", "onResume()");
-        while(!DataStatus) {
-            try {
-                int index = -1;
-                int counter = 0;
-                String url = "http://free.currencyconverterapi.com/api/v6/currencies?apiKey=973c6ac039f7d47fbd2f";
-                NetworkManager networkManager = new NetworkManager();
-                String inputLine = networkManager.makeRequest(this, url);
-                if (inputLine == null) DataStatus = false;
-                else {
-                    index = inputLine.indexOf("currencyName");
-                    DataStatus = true;
-                }
-                String buf;
-                while (index != -1) {
-                    inputLine = inputLine.substring(index + 15);
-                    index = inputLine.indexOf("\"");
-                    buf = inputLine.substring(0, index);
-                    currencyList.add(buf);
-                    index = inputLine.indexOf("id");
-                    inputLine = inputLine.substring(index + 5);
-                    index = inputLine.indexOf("\"");
-                    buf = inputLine.substring(0, index);
-                    currencyData.put(currencyList.get(counter), buf);
-                    index = inputLine.indexOf("currencyName");
-                    counter++;
-                }
-                Collections.sort(currencyList);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        tryMakeRequest();
+        if (!isDataLoaded) {
+            initBroadcastReceiver();
         }
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
         Log.i("MyTag", "onPause");
+        //вот тут, если данные не загружены, надо отменить ожидание загрузки данных
     }
+
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
         Log.i("MyTag", "onStop");
     }
+
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         Log.i("MyTag", "onDestroy");
     }
+
+    private void initBroadcastReceiver() {
+        NetworkChangeReceiver receiver = new NetworkChangeReceiver(isDataLoaded, currencyData, currencyList);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(receiver, filter);
+    }
+
+    private void tryMakeRequest() {
+        try {
+            int index = -1;
+            int counter = 0;
+            String url = "http://free.currencyconverterapi.com/api/v6/currencies?apiKey=973c6ac039f7d47fbd2f";
+            NetworkManager networkManager = new NetworkManager();
+            String inputLine = networkManager.makeRequest(this, url);
+            if (inputLine == null) isDataLoaded = false;
+            else index = inputLine.indexOf("currencyName");
+            String buf;
+            while (index != -1) {
+                inputLine = inputLine.substring(index + 15);
+                index = inputLine.indexOf("\"");
+                buf = inputLine.substring(0, index);
+                currencyList.add(buf);
+                index = inputLine.indexOf("id");
+                inputLine = inputLine.substring(index + 5);
+                index = inputLine.indexOf("\"");
+                buf = inputLine.substring(0, index);
+                currencyData.put(currencyList.get(counter), buf);
+                index = inputLine.indexOf("currencyName");
+                counter++;
+            }
+            Collections.sort(currencyList);
+            if (currencyList.size() != 0) isDataLoaded = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
