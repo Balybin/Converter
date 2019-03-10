@@ -55,20 +55,22 @@ public class Converter extends AppCompatActivity {
             }
         };
         convertButton.setOnClickListener(oclConvertButton);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencyList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        currencyFrom.setAdapter(adapter);
-        currencyTo.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        final Spinner currencyFrom = (Spinner) findViewById(R.id.currencyFrom);
+        final Spinner currencyTo = (Spinner) findViewById(R.id.currencyTo);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencyList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         Log.i("MyTag", "onResume()");
         tryMakeRequest();
         if (!isDataLoaded) {
-            initBroadcastReceiver();
+            initBroadcastReceiver(currencyFrom, currencyTo);
         }
+        currencyFrom.setAdapter(adapter);
+        currencyTo.setAdapter(adapter);
     }
 
     @Override
@@ -90,8 +92,9 @@ public class Converter extends AppCompatActivity {
         Log.i("MyTag", "onDestroy");
     }
 
-    private void initBroadcastReceiver() {
-        NetworkChangeReceiver receiver = new NetworkChangeReceiver(isDataLoaded, currencyData, currencyList);
+    private void initBroadcastReceiver(Spinner currencyFrom, Spinner currencyTo) {
+        //NetworkChangeReceiver receiver = new NetworkChangeReceiver(isDataLoaded, currencyData, currencyList);
+        NetworkChangeReceiver receiver = new NetworkChangeReceiver(isDataLoaded, currencyData,currencyList,currencyFrom,currencyTo);
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         registerReceiver(receiver, filter);
