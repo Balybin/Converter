@@ -21,6 +21,7 @@ public class Converter extends AppCompatActivity {
     Map<String, String> currencyData = new HashMap<String, String>();
     ArrayList<String> currencyList = new ArrayList<String>();
     boolean isDataLoaded = false;
+    boolean isReceiverExist = false;
 
     //ArrayList<Map<String,String>> currencyData = new ArrayList<Map<String,String>>;
     @Override
@@ -66,8 +67,9 @@ public class Converter extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         Log.i("MyTag", "onResume()");
         tryMakeRequest();
-        if (!isDataLoaded) {
+        if (!isDataLoaded && !isReceiverExist) {
             initBroadcastReceiver(currencyFrom, currencyTo);
+            isReceiverExist = true;
         }
         currencyFrom.setAdapter(adapter);
         currencyTo.setAdapter(adapter);
